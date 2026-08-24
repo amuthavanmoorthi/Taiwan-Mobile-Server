@@ -10,7 +10,9 @@ import { mkdirSync } from "node:fs";
  * anywhere real: 3D models are large, and the API server should not be the
  * thing holding them.
  */
-const UPLOAD_DIR = join(process.cwd(), "uploads");
+// Zeabur container storage is ephemeral unless we point at a mounted volume.
+// Default to a local folder for dev, but allow an override in production.
+const UPLOAD_DIR = process.env.UPLOAD_DIR ?? join(process.cwd(), "uploads");
 mkdirSync(UPLOAD_DIR, { recursive: true });
 
 // Images for the listing, GLB/USDZ for the AR pipeline. Anything else is
