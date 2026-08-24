@@ -216,10 +216,85 @@ async function main() {
         glbUrl: "/models/bed.glb",
         usdzUrl: "/models/bed.usdz",
       },
+
+      // The three below were built by scripts/photo-to-3d.mjs from actual
+      // depot photographs, not modelled by hand. They are the honest sample of
+      // what the intake pipeline produces: a silhouette extrusion carrying the
+      // photograph as its texture. Read straight on they look right; walked
+      // around, the sides are flat. That is the point of showing them.
+      //
+      // thumbnailUrl is the source photograph, so the listing shows the input
+      // and the output side by side.
+      {
+        title: "收納穿鞋椅",
+        description:
+          "清潔隊回收之收納穿鞋椅，上層軟墊、下層開放層板與抽屜。本件 3D 由現場單張照片自動生成。",
+        category: "living-shoe-rack",
+        material: "木芯板、布面",
+        color: "淺木色",
+        grade: "B",
+        defects: "檯面邊角有輕微碰撞痕；抽屜面板顏色與本體略有色差。",
+        widthMm: 1000, depthMm: 320, heightMm: 450,
+        scaleSource: "manual",
+        saleMode: "fixed",
+        priceTwd: 600,
+        status: "listed",
+        siteId: banqiao.id,
+        pickupTerms: PICKUP_TERMS,
+        thumbnailUrl: "/models/gen-bench.jpg",
+        glbUrl: "/models/gen-bench.glb",
+        usdzUrl: "/models/gen-bench.usdz",
+        modelStatus: "ready",
+        modelSource: "single_photo",
+      },
+      {
+        title: "紅色塑膠椅凳",
+        description:
+          "常見之塑膠高腳椅凳，防滑座面，堪用。本件 3D 由現場單張照片自動生成。",
+        category: "living-chair",
+        material: "塑膠",
+        color: "紅色",
+        grade: "C",
+        defects: "表面褪色，椅腳有刮痕。",
+        widthMm: 320, depthMm: 320, heightMm: 470,
+        scaleSource: "manual",
+        saleMode: "fixed",
+        priceTwd: 120,
+        status: "listed",
+        siteId: xindian.id,
+        pickupTerms: PICKUP_TERMS,
+        thumbnailUrl: "/models/gen-stool.jpg",
+        glbUrl: "/models/gen-stool.glb",
+        usdzUrl: "/models/gen-stool.usdz",
+        modelStatus: "ready",
+        modelSource: "single_photo",
+      },
+      {
+        title: "實木方形茶几",
+        description:
+          "實木方形茶几，下層附置物層板，漆面完整。本件 3D 由現場單張照片自動生成。",
+        category: "living-coffee-table",
+        material: "實木",
+        color: "紅木色",
+        grade: "A",
+        defects: "檯面有數處淺層刮痕。",
+        widthMm: 800, depthMm: 800, heightMm: 420,
+        scaleSource: "manual",
+        saleMode: "fixed",
+        priceTwd: 1500,
+        status: "listed",
+        siteId: banqiao.id,
+        pickupTerms: PICKUP_TERMS,
+        thumbnailUrl: "/models/gen-table.jpg",
+        glbUrl: "/models/gen-table.glb",
+        usdzUrl: "/models/gen-table.usdz",
+        modelStatus: "ready",
+        modelSource: "single_photo",
+      },
     ],
   });
 
-  console.log(`Seeded 3 sites, 3 users, ${slots.length} slots, 6 products.`);
+  console.log(`Seeded 3 sites, 3 users, ${slots.length} slots, 9 products.`);
   console.log("Logins — staff@ntpc.gov.tw / admin@ntpc.gov.tw / buyer@example.com, all demo1234");
 }
 
