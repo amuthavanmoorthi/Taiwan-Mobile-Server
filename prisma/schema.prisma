@@ -1,0 +1,213 @@
+// Second-hand furniture 3D/AR platform — demo schema.
+// Mirrors the client's live auction site: district-level depots, a seller unit
+// per site, bidding on listings, and in-person collection only.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// buyer  — public shopper: bids, buys, collects
+// staff  — depot worker: verifies vouchers, releases items
+// admin  — operator: everything
+model User {
+  id           String  @id @default(cuid())
+  email        String  @unique
+  passwordHash String
+  name         String
+  phone        String?
+  role         String  @default("buyer")
+
+  // Staff are scoped to the depot they work at.
+  siteId String?
+  site   Site?   @relation(fields: [siteId], references: [id])
+
+  orders    Order[]
+  bids      Bid[]
+  views     ProductView[]
+  faqs      Faq[]
+  createdAt DateTime      @default(now())
+
+  @@index([role])
+}
+
+// A collection point. One per district, matching the client's structure.
+model Site {
+  id        String  @id @default(cuid())
+  name      String
+  district  String // e.g. "土城區" — matches the client's district filter
+  address   String
+  phone     String?
+  openHours String?
+
+  // 賣家資訊 block on the client's product pages.
+  sellerUnit    String? // 單位, e.g. "土城區清潔隊"
+  sellerContact String? // 聯絡人
+  sellerEmail   String?
+
+  products  Product[]
+  orders    Order[]
+  slots     PickupSlot[]
+  staff     User[]
+  createdAt DateTime     @default(now())
+}
+
+model Product {
+  id          String  @id @default(cuid())
+  title       String
+  description String?
+  category    String // key from the shared category tree
+  material    String?
+  color       String?
+  grade       String  @default("B") // A / B / C, best to worst
+  defects     String?
+
+  // Real-world size in millimetres. Drives 1:1 AR placement, so it must be
+  // set before listing. Photogrammetry cannot recover absolute scale on its
+  // own — scaleSource records how it was established.
+  widthMm     Int?
+  depthMm     Int?
+  heightMm    Int?
+  scaleSource String? // manual | marker | arkit
+
+  // fixed   — buy now at priceTwd
+  // auction — bid from startingBidTwd until bidEndsAt (the client's model)
+  saleMode       String    @default("fixed")
+  priceTwd       Int
+  startingBidTwd Int?
+  bidEndsAt      DateTime?
+
+  // Assets. Both AR formats are produced once at ingest, never on demand.
+  thumbnailUrl String?
+  glbUrl       String? // Android Scene Viewer + in-page 3D viewer
+  usdzUrl      String? // iOS AR Quick Look
+  splatUrl     String? // high-fidelity viewer only; not AR-capable
+
+  pickupTerms String? // 商品規格
+
+  // Photo-to-3D generation state.
+  // none | queued | processing | review | ready | failed | rejected
+  //
+  // "review" means a model exists but staff have not yet accepted it. A
+  // generated model is never shown to buyers before someone has looked at it.
+  modelStatus String  @default("none")
+  modelSource String? // upload | single_photo | photogrammetry
+  modelError  String?
+
+  // What the item should become once its model is accepted or rejected. Set
+  // when generation is requested, because the item is held as a draft until
+  // then.
+  publishAfterReview Boolean @default(false)
+
+  // draft | pending_review | listed | reserved | sold | delisted
+  status String @default("draft")
+
+  siteId String
+  site   Site   @relation(fields: [siteId], references: [id])
+
+  orders    Order[]
+  bids      Bid[]
+  views     ProductView[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([status, category])
+}
+
+model Bid {
+  id        String   @id @default(cuid())
+  amountTwd Int
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@index([productId, amountTwd])
+  @@index([userId])
+}
+
+// Recently-viewed list on the buyer's account page.
+model ProductView {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  viewedAt  DateTime @default(now())
+
+  @@unique([userId, productId])
+  @@index([userId, viewedAt])
+}
+
+model PickupSlot {
+  id       String   @id @default(cuid())
+  siteId   String
+  site     Site     @relation(fields: [siteId], references: [id])
+  startsAt DateTime
+  endsAt   DateTime
+  capacity Int      @default(4)
+  orders   Order[]
+
+  @@index([siteId, startsAt])
+}
+
+model Order {
+  id     String @id @default(cuid())
+  code   String @unique // shown on the voucher, typed by staff
+  status String @default("awaiting_payment") // awaiting_payment | paid | collected | cancelled | expired
+
+  buyerName  String
+  buyerPhone String
+  buyerEmail String?
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  siteId String
+  site   Site   @relation(fields: [siteId], references: [id])
+
+  slotId String?
+  slot   PickupSlot? @relation(fields: [slotId], references: [id])
+
+  amountTwd Int
+  // Gateway reference only. Card data never touches this database.
+  paymentRef String?
+
+  collectedAt DateTime?
+  collectedBy String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([userId])
+}
+
+/// Editable FAQ entries. Seeded from the static copy, then maintained by
+/// staff through the depot area. Rules pages can reuse this shape later.
+model Faq {
+  id        String  @id @default(cuid())
+  locale    String // zh | en — one row per language
+  question  String
+  /// One bullet per line. Rendered as a list, so multi-part answers stay
+  /// readable instead of becoming one run-on paragraph.
+  answer    String
+  sortOrder Int     @default(0)
+  published Boolean @default(true)
+
+  createdById String?
+  createdBy   User?   @relation(fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([locale, published, sortOrder])
+}
