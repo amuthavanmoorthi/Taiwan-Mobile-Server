@@ -1,14 +1,10 @@
-# Backend image WITH the splat converter.
+# Backend image.
 #
-# Named Dockerfile.splat, not Dockerfile, on purpose: Zeabur auto-detects a
-# root Dockerfile and would switch the service off nixpacks the moment this
-# lands. That build works today, and swapping it days before a demo is not a
-# risk worth taking silently. To adopt this, point the Zeabur service at
-# `Dockerfile.splat` explicitly, or rename it.
-#
-# Without it the API still runs, but both the .ply upload slot and multi-photo
-# carving are unavailable - /api/health reports splat:false and carving:false,
-# and generation falls back to extruding a single photo.
+# This replaces the nixpacks build. Zeabur uses a root Dockerfile when it finds
+# one, which is what switching this file's name did. The API needs Python
+# beside Node now and nixpacks was not giving it; without this image
+# /api/health reports splat:false and carving:false, and 3D generation falls
+# back to extruding a single photo.
 #
 # Node alone would be enough for the API. Python and Open3D are here for two
 # reasons: converting a Gaussian splat .ply into the GLB and USDZ that AR
