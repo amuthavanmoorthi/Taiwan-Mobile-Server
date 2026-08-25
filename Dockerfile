@@ -38,9 +38,21 @@ WORKDIR /src
 # Dependencies first so a source-only change does not reinstall them.
 # The schema comes along because postinstall runs `prisma generate`, which
 # reads it - without this npm ci fails before any source is copied.
-COPY package.json package-lock.json ./
+# .npmrc carries the fetch retry settings. Without it in the image the build
+# gets npm's default two retries, and a single dropped connection to the
+# registry fails the whole deploy - which is exactly what kept happening.
+COPY package.json package-lock.json .npmrc ./
 COPY prisma ./prisma
-RUN npm ci
+
+# Retried around as well: the registry drops connections often enough on this
+# builder that even npm's own retries are not always enough, and a failed
+# deploy costs far more than three attempts.
+RUN for attempt in 1 2 3; do \
+      npm ci --no-audit --no-fund && break; \
+      echo "npm ci attempt $attempt failed; retrying"; \
+      sleep 10; \
+    done; \
+    test -d node_modules
 
 COPY . .
 RUN npm run build
