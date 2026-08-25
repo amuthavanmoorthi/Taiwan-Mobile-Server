@@ -126,8 +126,9 @@ export const ModelingService = {
         modelStatus: "failed",
         modelError:
           views.length > 0 && views.length < MIN_VIEWS
-            ? `Only ${views.length} photo(s) uploaded. Take at least ${MIN_VIEWS} around ` +
-              `the item to build a 3D shape, or set MODELING_PROVIDER to generate from one.`
+            ? `Generating 3D needs at least ${MIN_VIEWS} photos from different angles; ` +
+              `${views.length} were uploaded. The outlines are compared across angles to ` +
+              `carve the shape, and one angle cannot tell depth.`
             : "No modelling provider configured. Set MODELING_PROVIDER=local or =meshy.",
       });
       return;
