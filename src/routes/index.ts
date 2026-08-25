@@ -9,7 +9,7 @@ import { SiteModel } from "../models/SiteModel.js";
 import { InventoryController } from "../controllers/InventoryController.js";
 import { ModelingService } from "../services/ModelingService.js";
 import { FaqController } from "../controllers/FaqController.js";
-import { upload } from "../services/UploadService.js";
+import { upload, UploadService } from "../services/UploadService.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 
 /**
@@ -225,6 +225,14 @@ router.patch(
   "/staff/inventory/:id/status",
   requireRole("staff", "admin"),
   wrap(async (req: any) => InventoryController.setStatus(req.params.id, req.body?.status)),
+);
+
+// Staff-only rather than on /health: it reports a filesystem path, and there
+// is no reason for that to be public.
+router.get(
+  "/staff/storage",
+  requireRole("staff", "admin"),
+  wrap(async () => UploadService.storage()),
 );
 
 router.post(

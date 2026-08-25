@@ -1,7 +1,14 @@
 import multer from "multer";
 import { extname, join } from "node:path";
 import { randomBytes } from "node:crypto";
-import { mkdirSync } from "node:fs";
+import {
+  mkdirSync,
+  accessSync,
+  constants,
+  readdirSync,
+  statSync,
+  statfsSync,
+} from "node:fs";
 
 /**
  * SERVICE - file intake for depot staff.
@@ -61,5 +68,63 @@ export const UploadService = {
   /** Public URLs for a whole field, in the order they were uploaded. */
   urlsFor(files?: Express.Multer.File[]) {
     return (files ?? []).map((f) => `/uploads/${f.filename}`);
+  },
+
+  /**
+   * Where uploads actually land, and whether that survives a redeploy.
+   *
+   * Container filesystems are wiped on every deploy. If UPLOAD_DIR is not
+   * pointed at a mounted volume then every photo, video and model staff have
+   * uploaded disappears the next time the service restarts - silently, and
+   * usually discovered in front of someone. There is no way to detect a mount
+   * from inside the process with certainty, so this reports what it can and
+   * treats "UPLOAD_DIR was not set" as the warning sign, because the default
+   * is a path inside the container.
+   */
+  storage() {
+    const configured = !!process.env.UPLOAD_DIR;
+
+    let writable = false;
+    try {
+      accessSync(UPLOAD_DIR, constants.W_OK);
+      writable = true;
+    } catch {
+      writable = false;
+    }
+
+    let files = 0;
+    let bytes = 0;
+    try {
+      for (const name of readdirSync(UPLOAD_DIR, { withFileTypes: true })) {
+        if (!name.isFile()) continue;
+        files++;
+        try {
+          bytes += statSync(join(UPLOAD_DIR, name.name)).size;
+        } catch {
+          // A file can vanish between listing and stat; it just does not count.
+        }
+      }
+    } catch {
+      files = -1;
+    }
+
+    let freeBytes: number | null = null;
+    try {
+      const fs = statfsSync(UPLOAD_DIR);
+      freeBytes = Number(fs.bavail) * Number(fs.bsize);
+    } catch {
+      freeBytes = null;
+    }
+
+    return {
+      dir: UPLOAD_DIR,
+      // The only signal available: an explicit UPLOAD_DIR means somebody
+      // chose the location, which is what mounting a volume requires.
+      persistent: configured,
+      writable,
+      files,
+      bytes,
+      freeBytes,
+    };
   },
 };
