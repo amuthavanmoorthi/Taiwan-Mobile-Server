@@ -82,7 +82,16 @@ model Product {
   bidEndsAt      DateTime?
 
   // Assets. Both AR formats are produced once at ingest, never on demand.
-  thumbnailUrl String?
+  thumbnailUrl String? // the listing's lead image, also the model's poster
+  /// Every uploaded photo in display order, thumbnail included. Buyers judge a
+  /// second-hand item on its wear, and one angle hides most of it. Stored as a
+  /// JSON array rather than a side table because nothing queries an individual
+  /// image - they are only ever read back with the product.
+  imageUrls    Json?
+  /// Source video, when the operator captured one instead of stills. Frames
+  /// are extracted in the browser at upload time, so this is kept for the
+  /// record rather than processed server-side.
+  videoUrl     String?
   glbUrl       String? // Android Scene Viewer + in-page 3D viewer
   usdzUrl      String? // iOS AR Quick Look
   splatUrl     String? // high-fidelity viewer only; not AR-capable
@@ -177,7 +186,7 @@ model Order {
   slotId String?
   slot   PickupSlot? @relation(fields: [slotId], references: [id])
 
-  amountTwd Int
+  amountTwd  Int
   // Gateway reference only. Card data never touches this database.
   paymentRef String?
 

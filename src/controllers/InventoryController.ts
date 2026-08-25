@@ -50,8 +50,15 @@ export const InventoryController = {
     }
 
     const uploadedModel = !!files.glb?.[0];
-    const photo = files.photo?.[0];
+    const photos = files.photo ?? [];
+    const video = files.video?.[0];
     const splat = files.splat?.[0];
+
+    // The operator picks which shot leads the listing and feeds generation;
+    // the index is 1-based in the form, and out-of-range falls back to the
+    // first rather than erroring - a bad index is not worth losing an upload.
+    const leadIndex = Math.max(0, Math.min(photos.length - 1, num(body.leadPhoto) ?? 0));
+    const photo = photos[leadIndex];
 
     // A splat is a scan of the real item, so it beats generating from one
     // photo. Both are skipped when a finished model was uploaded outright.
@@ -95,7 +102,16 @@ export const InventoryController = {
       bidEndsAt: body.bidEndsAt ? new Date(body.bidEndsAt) : null,
       pickupTerms: body.pickupTerms || null,
       siteId,
-      thumbnailUrl: UploadService.urlFor(files.photo?.[0]?.filename),
+      thumbnailUrl: UploadService.urlFor(photo?.filename),
+      // Lead first, then the rest in upload order, so the gallery opens on the
+      // same image the card shows.
+      imageUrls: photos.length
+        ? [
+            ...UploadService.urlsFor([photo]),
+            ...UploadService.urlsFor(photos.filter((_, i) => i !== leadIndex)),
+          ]
+        : undefined,
+      videoUrl: UploadService.urlFor(video?.filename),
       glbUrl: UploadService.urlFor(files.glb?.[0]?.filename),
       usdzUrl: UploadService.urlFor(files.usdz?.[0]?.filename),
       // The splat is kept as well as converted. It is the better likeness and

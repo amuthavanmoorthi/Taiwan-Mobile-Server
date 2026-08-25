@@ -188,10 +188,12 @@ router.post(
   "/staff/inventory",
   requireRole("staff", "admin"),
   upload.fields([
-    { name: "photo", maxCount: 1 },
+    // Frames pulled from a video land here too, so the ceiling is generous.
+    { name: "photo", maxCount: 12 },
     { name: "glb", maxCount: 1 },
     { name: "usdz", maxCount: 1 },
     { name: "splat", maxCount: 1 },
+    { name: "video", maxCount: 1 },
   ]),
   wrap(async (req: any) =>
     InventoryController.create(req.session.sub, req.body, req.files ?? {}),

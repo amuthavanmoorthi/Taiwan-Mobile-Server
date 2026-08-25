@@ -19,10 +19,13 @@ mkdirSync(UPLOAD_DIR, { recursive: true });
 // splat scan we convert ourselves. Anything else is rejected rather than
 // stored and served back to browsers.
 const ALLOWED: Record<string, string[]> = {
+  // One field, several files. A second-hand listing lives or dies on showing
+  // the wear, and one angle hides most of it.
   photo: [".jpg", ".jpeg", ".png", ".webp"],
   glb: [".glb"],
   usdz: [".usdz"],
   splat: [".ply"],
+  video: [".mp4", ".mov", ".webm", ".m4v"],
 };
 
 const storage = multer.diskStorage({
@@ -53,5 +56,10 @@ export const UploadService = {
   /** Public URL for a stored file. */
   urlFor(filename?: string) {
     return filename ? `/uploads/${filename}` : null;
+  },
+
+  /** Public URLs for a whole field, in the order they were uploaded. */
+  urlsFor(files?: Express.Multer.File[]) {
+    return (files ?? []).map((f) => `/uploads/${f.filename}`);
   },
 };
