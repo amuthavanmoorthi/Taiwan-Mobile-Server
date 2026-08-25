@@ -1,5 +1,6 @@
 import { ProductAdminModel } from "../models/ProductAdminModel.js";
 import { runLocalPipeline } from "./providers/localPipeline.js";
+import { runSplatPipeline, splatConversionAvailable } from "./providers/splatPipeline.js";
 
 /**
  * SERVICE — photo-to-3D generation.
@@ -12,6 +13,9 @@ import { runLocalPipeline } from "./providers/localPipeline.js";
  *   meshy  — commercial single-image API (paid).
  *   local  — Garychou's own reconstruction pipeline.
  *
+ * Splat conversion (.ply → GLB + USDZ) is separate from all of that. It is
+ * our own script rather than a provider, so it is always available.
+ *
  * Single-photo generation recovers a plausible mesh but NOT absolute scale,
  * and it invents the unseen faces. Callers pass the staff-measured height so
  * the result can be scaled to something real — without that, AR at 1:1 would
@@ -20,7 +24,9 @@ import { runLocalPipeline } from "./providers/localPipeline.js";
 
 export type ModelJob = {
   productId: string;
-  photoPath: string;
+  /** Photo for single-image generation, or a 3DGS .ply to convert. */
+  sourcePath: string;
+  kind: "photo" | "splat";
   /** Staff-measured height in mm, used to scale the generated mesh. */
   heightMm?: number | null;
 };
@@ -30,9 +36,18 @@ const PROVIDER = process.env.MODELING_PROVIDER ?? "none";
 export const ModelingService = {
   provider: PROVIDER,
 
-  /** True when a real generator is configured. */
+  /** True when a real photo generator is configured. */
   get available() {
     return PROVIDER !== "none";
+  },
+
+  /**
+   * Splat conversion is ours, not a configured provider, so it works whether
+   * or not MODELING_PROVIDER is set. Staff can upload a .ply from Garychou
+   * even on a deployment with no photo pipeline.
+   */
+  get splatAvailable() {
+    return splatConversionAvailable();
   },
 
   /**
@@ -54,6 +69,25 @@ export const ModelingService = {
       modelError: null,
     });
 
+    // Height anchors the model to reality on both paths. A splat file carries
+    // no unit at all, so this is not optional there either.
+    if (!job.heightMm || job.heightMm <= 0) {
+      throw new Error(
+        "Height (mm) is required so the generated model can be scaled to the real item.",
+      );
+    }
+
+    if (job.kind === "splat") {
+      const { glbUrl, usdzUrl } = await runSplatPipeline(job.sourcePath, job.heightMm);
+      await ProductAdminModel.update(job.productId, {
+        glbUrl,
+        usdzUrl,
+        modelStatus: "review",
+        modelError: null,
+      });
+      return;
+    }
+
     if (PROVIDER === "none") {
       await ProductAdminModel.update(job.productId, {
         modelStatus: "failed",
@@ -64,15 +98,7 @@ export const ModelingService = {
     }
 
     if (PROVIDER === "local") {
-      // Height is what anchors the model to reality; without it the result
-      // would be an arbitrary size, so refuse rather than guess.
-      if (!job.heightMm || job.heightMm <= 0) {
-        throw new Error(
-          "Height (mm) is required so the generated model can be scaled to the real item.",
-        );
-      }
-
-      const { glbUrl, usdzUrl } = await runLocalPipeline(job.photoPath, job.heightMm);
+      const { glbUrl, usdzUrl } = await runLocalPipeline(job.sourcePath, job.heightMm);
       // "review", not "ready": a generated model is never shown to buyers
       // before a person has looked at it.
       await ProductAdminModel.update(job.productId, {

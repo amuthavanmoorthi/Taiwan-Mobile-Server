@@ -51,9 +51,23 @@ export const InventoryController = {
 
     const uploadedModel = !!files.glb?.[0];
     const photo = files.photo?.[0];
-    // Generation only makes sense from a photo, and only when no model was
-    // uploaded outright.
-    const wantsGeneration = body.generateModel === "true" && !!photo && !uploadedModel;
+    const splat = files.splat?.[0];
+
+    // A splat is a scan of the real item, so it beats generating from one
+    // photo. Both are skipped when a finished model was uploaded outright.
+    const wantsSplat = !!splat && !uploadedModel;
+    const wantsPhotoGeneration =
+      !wantsSplat && body.generateModel === "true" && !!photo && !uploadedModel;
+    const wantsGeneration = wantsSplat || wantsPhotoGeneration;
+
+    // Both paths scale the mesh to the measured height. Without it the result
+    // would be an arbitrary size, and AR would place it confidently wrong.
+    if (wantsGeneration && !heightMm) {
+      throw new HttpError(
+        "Height (mm) is required so the generated model can be scaled to the real item.",
+        400,
+      );
+    }
 
     const saleMode = body.saleMode === "auction" ? "auction" : "fixed";
     const startingBidTwd = saleMode === "auction" ? num(body.startingBidTwd) : null;
@@ -84,15 +98,27 @@ export const InventoryController = {
       thumbnailUrl: UploadService.urlFor(files.photo?.[0]?.filename),
       glbUrl: UploadService.urlFor(files.glb?.[0]?.filename),
       usdzUrl: UploadService.urlFor(files.usdz?.[0]?.filename),
+      // The splat is kept as well as converted. It is the better likeness and
+      // drives the on-page viewer; the mesh exists because AR Quick Look
+      // cannot render splats.
+      splatUrl: UploadService.urlFor(splat?.filename),
       // A generated listing is held as a draft until its model is reviewed,
       // so an unchecked model can never reach a buyer.
       status: wantsGeneration ? "draft" : status,
       publishAfterReview: wantsGeneration && status === "listed",
       modelStatus: uploadedModel ? "ready" : wantsGeneration ? "queued" : "none",
-      modelSource: uploadedModel ? "upload" : wantsGeneration ? "single_photo" : null,
+      modelSource: uploadedModel
+        ? "upload"
+        : wantsSplat
+          ? "gaussian_splat"
+          : wantsPhotoGeneration
+            ? "single_photo"
+            : null,
     }).then(async (product) => {
-      if (wantsGeneration && photo) {
-        await InventoryController.requestModel(product.id, photo.path, heightMm);
+      if (wantsSplat && splat) {
+        await InventoryController.requestModel(product.id, splat.path, heightMm, "splat");
+      } else if (wantsPhotoGeneration && photo) {
+        await InventoryController.requestModel(product.id, photo.path, heightMm, "photo");
       }
       return product;
     });
@@ -141,8 +167,13 @@ export const InventoryController = {
   },
 
   /** Kicks off generation after the product row exists. */
-  async requestModel(productId: string, photoPath: string, heightMm?: number | null) {
-    ModelingService.enqueue({ productId, photoPath, heightMm });
+  async requestModel(
+    productId: string,
+    sourcePath: string,
+    heightMm?: number | null,
+    kind: "photo" | "splat" = "photo",
+  ) {
+    ModelingService.enqueue({ productId, sourcePath, heightMm, kind });
   },
 
   async setStatus(id: string, status: string) {

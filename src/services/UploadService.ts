@@ -15,12 +15,14 @@ import { mkdirSync } from "node:fs";
 const UPLOAD_DIR = process.env.UPLOAD_DIR ?? join(process.cwd(), "uploads");
 mkdirSync(UPLOAD_DIR, { recursive: true });
 
-// Images for the listing, GLB/USDZ for the AR pipeline. Anything else is
-// rejected rather than stored and served back to browsers.
+// Images for the listing, GLB/USDZ for the AR pipeline, .ply for a Gaussian
+// splat scan we convert ourselves. Anything else is rejected rather than
+// stored and served back to browsers.
 const ALLOWED: Record<string, string[]> = {
   photo: [".jpg", ".jpeg", ".png", ".webp"],
   glb: [".glb"],
   usdz: [".usdz"],
+  splat: [".ply"],
 };
 
 const storage = multer.diskStorage({
@@ -34,7 +36,9 @@ const storage = multer.diskStorage({
 
 export const upload = multer({
   storage,
-  limits: { fileSize: 60 * 1024 * 1024 }, // 60 MB — a real scan export fits
+  // Splat exports are far larger than a mesh: a trained scene runs to
+  // hundreds of MB before it is cropped to one item.
+  limits: { fileSize: 400 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     const ext = extname(file.originalname).toLowerCase();
     const permitted = ALLOWED[file.fieldname] ?? [];

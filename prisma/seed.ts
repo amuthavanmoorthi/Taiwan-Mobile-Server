@@ -292,10 +292,39 @@ async function main() {
         modelStatus: "ready",
         modelSource: "single_photo",
       },
+
+      // The only item here built from a Gaussian splat scan rather than a
+      // photo. It carries both representations on purpose: the .ply is the
+      // truer likeness and drives the on-page viewer, while the mesh exists
+      // solely so the AR button works — AR Quick Look cannot render splats,
+      // and most buyers here are on iPhone.
+      {
+        title: "三層收納推車",
+        description:
+          "三層附輪收納推車，層板完整、滾輪順暢。本件以 3D 高斯潑濺掃描建檔，可旋轉檢視掃描原檔，或切換至 3D / AR 以實際尺寸擺放於家中。",
+        category: "living-storage",
+        material: "塑膠、金屬",
+        color: "白色",
+        grade: "B",
+        defects: "層板有使用痕跡；部分表面泛黃。",
+        widthMm: 500, depthMm: 520, heightMm: 800,
+        scaleSource: "manual",
+        saleMode: "fixed",
+        priceTwd: 350,
+        status: "listed",
+        siteId: xindian.id,
+        pickupTerms: PICKUP_TERMS,
+        thumbnailUrl: "/models/gen-trolley.jpg",
+        glbUrl: "/models/gen-trolley.glb",
+        usdzUrl: "/models/gen-trolley.usdz",
+        splatUrl: "/models/gen-trolley.ply",
+        modelStatus: "ready",
+        modelSource: "gaussian_splat",
+      },
     ],
   });
 
-  console.log(`Seeded 3 sites, 3 users, ${slots.length} slots, 9 products.`);
+  console.log(`Seeded 3 sites, 3 users, ${slots.length} slots, 10 products.`);
   console.log("Logins — staff@ntpc.gov.tw / admin@ntpc.gov.tw / buyer@example.com, all demo1234");
 }
 

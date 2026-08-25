@@ -3,6 +3,7 @@ import { AuthController } from "../controllers/AuthController.js";
 import { ProductController } from "../controllers/ProductController.js";
 import { OrderController } from "../controllers/OrderController.js";
 import { StaffController } from "../controllers/StaffController.js";
+import { TeamController } from "../controllers/TeamController.js";
 import { AccountController } from "../controllers/AccountController.js";
 import { SiteModel } from "../models/SiteModel.js";
 import { InventoryController } from "../controllers/InventoryController.js";
@@ -30,7 +31,12 @@ const wrap =
   };
 
 router.get("/health", (_req, res) =>
-  res.json({ ok: true, modelling: ModelingService.available, provider: ModelingService.provider }),
+  res.json({
+    ok: true,
+    modelling: ModelingService.available,
+    provider: ModelingService.provider,
+    splat: ModelingService.splatAvailable,
+  }),
 );
 
 // --- auth ---------------------------------------------------------------
@@ -185,6 +191,7 @@ router.post(
     { name: "photo", maxCount: 1 },
     { name: "glb", maxCount: 1 },
     { name: "usdz", maxCount: 1 },
+    { name: "splat", maxCount: 1 },
   ]),
   wrap(async (req: any) =>
     InventoryController.create(req.session.sub, req.body, req.files ?? {}),
@@ -222,4 +229,33 @@ router.post(
   "/staff/verify",
   requireRole("staff", "admin"),
   wrap(async (req: any) => StaffController.verify(req.body?.code, req.body?.staffName)),
+);
+
+// --- team provisioning (admin only) -------------------------------------
+// Deliberately not under /staff: depot workers must not be able to grant
+// themselves a different depot, or promote themselves to admin.
+router.get(
+  "/admin/team",
+  requireRole("admin"),
+  wrap(async () => TeamController.list()),
+);
+router.post(
+  "/admin/team",
+  requireRole("admin"),
+  wrap(async (req: any) => TeamController.create(req.body)),
+);
+router.patch(
+  "/admin/team/:id",
+  requireRole("admin"),
+  wrap(async (req: any) => TeamController.update(req.session.sub, req.params.id, req.body)),
+);
+router.post(
+  "/admin/team/:id/password",
+  requireRole("admin"),
+  wrap(async (req: any) => TeamController.resetPassword(req.params.id, req.body?.password)),
+);
+router.delete(
+  "/admin/team/:id",
+  requireRole("admin"),
+  wrap(async (req: any) => TeamController.remove(req.session.sub, req.params.id)),
 );
