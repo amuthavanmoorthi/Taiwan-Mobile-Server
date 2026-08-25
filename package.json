@@ -11,7 +11,8 @@
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts && tsx prisma/seed-faqs.ts && tsx prisma/seed-sites.ts",
     "db:studio": "prisma studio",
-    "db:reset": "rm -f prisma/dev.db && prisma db push && tsx prisma/seed.ts && tsx prisma/seed-faqs.ts && tsx prisma/seed-sites.ts"
+    "db:reset": "rm -f prisma/dev.db && prisma db push && tsx prisma/seed.ts && tsx prisma/seed-faqs.ts && tsx prisma/seed-sites.ts",
+    "bootstrap": "node scripts/bootstrap.mjs"
   },
   "dependencies": {
     "@imgly/background-removal-node": "^1.4.5",
