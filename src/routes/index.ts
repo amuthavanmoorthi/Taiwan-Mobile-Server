@@ -36,6 +36,7 @@ router.get("/health", (_req, res) =>
     modelling: ModelingService.available,
     provider: ModelingService.provider,
     splat: ModelingService.splatAvailable,
+    carving: ModelingService.carvingAvailable,
   }),
 );
 

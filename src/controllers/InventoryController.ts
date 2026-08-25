@@ -134,7 +134,15 @@ export const InventoryController = {
       if (wantsSplat && splat) {
         await InventoryController.requestModel(product.id, splat.path, heightMm, "splat");
       } else if (wantsPhotoGeneration && photo) {
-        await InventoryController.requestModel(product.id, photo.path, heightMm, "photo");
+        // Every photo goes through, not just the lead: with enough of them the
+        // service carves a real shape instead of extruding one outline.
+        await InventoryController.requestModel(
+          product.id,
+          photo.path,
+          heightMm,
+          "photo",
+          photos.map((f) => f.path),
+        );
       }
       return product;
     });
@@ -188,8 +196,9 @@ export const InventoryController = {
     sourcePath: string,
     heightMm?: number | null,
     kind: "photo" | "splat" = "photo",
+    photoPaths?: string[],
   ) {
-    ModelingService.enqueue({ productId, sourcePath, heightMm, kind });
+    ModelingService.enqueue({ productId, sourcePath, heightMm, kind, photoPaths });
   },
 
   async setStatus(id: string, status: string) {

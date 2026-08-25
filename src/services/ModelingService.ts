@@ -1,6 +1,11 @@
 import { ProductAdminModel } from "../models/ProductAdminModel.js";
 import { runLocalPipeline } from "./providers/localPipeline.js";
 import { runSplatPipeline, splatConversionAvailable } from "./providers/splatPipeline.js";
+import {
+  runPhotosPipeline,
+  photosPipelineAvailable,
+  MIN_VIEWS,
+} from "./providers/photosPipeline.js";
 
 /**
  * SERVICE - photo-to-3D generation.
@@ -13,8 +18,10 @@ import { runSplatPipeline, splatConversionAvailable } from "./providers/splatPip
  *   meshy  - commercial single-image API (paid).
  *   local  - Garychou's own reconstruction pipeline.
  *
- * Splat conversion (.ply → GLB + USDZ) is separate from all of that. It is
- * our own script rather than a provider, so it is always available.
+ * Two of the three paths are ours rather than providers, so they work with no
+ * configuration at all: splat conversion (.ply -> GLB + USDZ), and multi-view
+ * silhouette carving from several photographs. Carving is preferred whenever
+ * there are enough views, because a single photo can only be extruded.
  *
  * Single-photo generation recovers a plausible mesh but NOT absolute scale,
  * and it invents the unseen faces. Callers pass the staff-measured height so
@@ -24,8 +31,10 @@ import { runSplatPipeline, splatConversionAvailable } from "./providers/splatPip
 
 export type ModelJob = {
   productId: string;
-  /** Photo for single-image generation, or a 3DGS .ply to convert. */
+  /** Lead photo, or a 3DGS .ply to convert. */
   sourcePath: string;
+  /** Every photo, when there are enough to carve from. */
+  photoPaths?: string[];
   kind: "photo" | "splat";
   /** Staff-measured height in mm, used to scale the generated mesh. */
   heightMm?: number | null;
@@ -48,6 +57,11 @@ export const ModelingService = {
    */
   get splatAvailable() {
     return splatConversionAvailable();
+  },
+
+  /** Multi-view carving is ours too, so it does not need a provider set. */
+  get carvingAvailable() {
+    return photosPipelineAvailable();
   },
 
   /**
@@ -88,11 +102,33 @@ export const ModelingService = {
       return;
     }
 
+    // Several photos beat one, so carving is tried first and the provider is
+    // only reached when there are too few views for it. Both scale to the
+    // measured height, so the result is interchangeable from here up.
+    const views = job.photoPaths ?? [];
+    if (views.length >= MIN_VIEWS && photosPipelineAvailable()) {
+      const { glbUrl, usdzUrl } = await runPhotosPipeline(views, job.heightMm);
+      await ProductAdminModel.update(job.productId, {
+        glbUrl,
+        usdzUrl,
+        modelStatus: "review",
+        // Corrected here rather than at intake: which method runs is not known
+        // until the job does, and a model carved from eight views should not
+        // be labelled as coming from one photo.
+        modelSource: "multi_photo",
+        modelError: null,
+      });
+      return;
+    }
+
     if (PROVIDER === "none") {
       await ProductAdminModel.update(job.productId, {
         modelStatus: "failed",
         modelError:
-          "No modelling provider configured. Set MODELING_PROVIDER=local or =meshy.",
+          views.length > 0 && views.length < MIN_VIEWS
+            ? `Only ${views.length} photo(s) uploaded. Take at least ${MIN_VIEWS} around ` +
+              `the item to build a 3D shape, or set MODELING_PROVIDER to generate from one.`
+            : "No modelling provider configured. Set MODELING_PROVIDER=local or =meshy.",
       });
       return;
     }

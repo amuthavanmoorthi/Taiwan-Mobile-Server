@@ -6,11 +6,13 @@
 # risk worth taking silently. To adopt this, point the Zeabur service at
 # `Dockerfile.splat` explicitly, or rename it.
 #
-# Without it the API still runs; ModelingService.splatAvailable reports false
-# and the .ply upload slot simply does not appear.
+# Without it the API still runs, but both the .ply upload slot and multi-photo
+# carving are unavailable - /api/health reports splat:false and carving:false,
+# and generation falls back to extruding a single photo.
 #
-# Node alone would be enough for the API. Python and Open3D are here for one
-# reason: converting a Gaussian splat .ply into the GLB and USDZ that AR needs.
+# Node alone would be enough for the API. Python and Open3D are here for two
+# reasons: converting a Gaussian splat .ply into the GLB and USDZ that AR
+# needs, and carving a mesh out of several photographs taken around an item.
 # AR Quick Look on iOS cannot render splats, and the 3D team's pipeline stops
 # at the .ply, so the conversion happens on this box or nowhere.
 #
@@ -30,9 +32,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV SPLAT_VENV=/opt/splat
 RUN python3 -m venv "$SPLAT_VENV" \
  && "$SPLAT_VENV/bin/pip" install --no-cache-dir --upgrade pip \
- && "$SPLAT_VENV/bin/pip" install --no-cache-dir "open3d==0.18.0" "numpy<2"
+ && "$SPLAT_VENV/bin/pip" install --no-cache-dir "open3d==0.18.0" "numpy<2" "pillow"
 
-# splat-to-3d.mjs shells out to this interpreter.
+# Both photos-to-3d.mjs and splat-to-3d.mjs shell out to this interpreter.
 ENV SPLAT_PYTHON="/opt/splat/bin/python"
 
 WORKDIR /src
