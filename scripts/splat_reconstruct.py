@@ -4,7 +4,7 @@
 
 Gary's pipeline stops at 3DGS. AR Quick Look on iOS renders meshes, not
 splats, so something has to bridge the two; this is that step. It is
-deliberately CPU-only — SuGaR and the other published splat-to-mesh methods
+deliberately CPU-only - SuGaR and the other published splat-to-mesh methods
 want CUDA, which no machine on this project has.
 
 Approach: treat the splat centres as an oriented point cloud and run screened
@@ -75,7 +75,7 @@ def read_3dgs(path):
         data = np.fromfile(fh, dtype=np.float32, count=n * len(names))
 
     if data.size != n * len(names):
-        die("PLY is truncated — the vertex data is shorter than the header claims.")
+        die("PLY is truncated - the vertex data is shorter than the header claims.")
 
     data = data.reshape(n, len(names))
     i = {k: j for j, k in enumerate(names)}
@@ -99,7 +99,7 @@ def clean(xyz, rgb, opacity, radius, min_opacity, radius_pct):
     """
     keep = opacity > min_opacity
     if keep.sum() < 1000:
-        # Nothing is opaque enough — better to relax than to fail outright.
+        # Nothing is opaque enough - better to relax than to fail outright.
         cutoff = np.quantile(opacity, 0.75)
         keep = opacity >= cutoff
         log(f"  few opaque splats; relaxed opacity cutoff to {cutoff:.3f}")
@@ -228,7 +228,7 @@ def main():
         pcd = pcd.voxel_down_sample(voxel)
         log(f"  {before} -> {len(pcd.points)} after voxel downsample ({voxel:.4f} units)")
         if len(pcd.points) < 500:
-            die("Downsampling left too few points — the scan is very sparse.")
+            die("Downsampling left too few points - the scan is very sparse.")
         # Downsampling drops the normals' orientation consistency, so redo it.
         pcd.estimate_normals(o3d.geometry.KDTreeSearchParamKNN(knn=30))
         pcd.orient_normals_consistent_tangent_plane(30)
@@ -272,7 +272,7 @@ def main():
     if mesh is None or len(mesh.triangles) == 0:
         die(
             "Poisson reconstruction produced no surface at any depth. The scan "
-            "is probably too sparse or too noisy — crop it to the single item "
+            "is probably too sparse or too noisy - crop it to the single item "
             "in SuperSplat and remove stray splats."
         )
     log(f"  {len(mesh.triangles)} triangles")
@@ -290,7 +290,7 @@ def main():
     mesh.compute_vertex_normals()
 
     if len(mesh.triangles) == 0:
-        die("Cleaning removed the whole mesh — the input is too sparse or too noisy.")
+        die("Cleaning removed the whole mesh - the input is too sparse or too noisy.")
 
     if not mesh.has_vertex_colors():
         die("Reconstruction lost vertex colours.")

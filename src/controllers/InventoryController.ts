@@ -12,7 +12,7 @@ const num = (v: unknown) => {
   return Number.isFinite(n) ? n : null;
 };
 
-/** CONTROLLER — depot staff creating and editing listings. */
+/** CONTROLLER - depot staff creating and editing listings. */
 export const InventoryController = {
   /** Scope: staff are pinned to their depot, admins see every site. */
   async scopeFor(userId: string) {
@@ -86,7 +86,7 @@ export const InventoryController = {
       widthMm,
       depthMm,
       heightMm,
-      // Recorded so it is clear how absolute scale was established —
+      // Recorded so it is clear how absolute scale was established -
       // photogrammetry alone cannot recover it.
       scaleSource: body.scaleSource || "manual",
       saleMode,

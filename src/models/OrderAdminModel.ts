@@ -13,13 +13,13 @@ export type OrderFilters = {
   perPage?: number;
 };
 
-/** MODEL — admin-side order queries: the pickup queue and collected history. */
+/** MODEL - admin-side order queries: the pickup queue and collected history. */
 export const OrderAdminModel = {
   async search(f: OrderFilters) {
     const page = Math.max(1, f.page ?? 1);
     const perPage = Math.min(100, f.perPage ?? 20);
 
-    // One box searches code, buyer name and phone — staff have a person at
+    // One box searches code, buyer name and phone - staff have a person at
     // the counter and whichever detail they have to hand should work.
     const where: Prisma.OrderWhereInput = {
       ...(f.siteId ? { siteId: f.siteId } : {}),

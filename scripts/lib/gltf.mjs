@@ -284,7 +284,7 @@ def Xform "Root"
  * displayColor both carry it directly, and both Scene Viewer and AR Quick Look
  * honour them.
  *
- * Kept separate from the textured writers above rather than folded into them —
+ * Kept separate from the textured writers above rather than folded into them -
  * the photo pipeline is working and shipping, and a shared code path would put
  * it at risk for no gain.
  */

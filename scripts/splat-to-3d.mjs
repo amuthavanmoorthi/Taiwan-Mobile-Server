@@ -5,7 +5,7 @@
  * WHY THIS EXISTS
  * ---------------
  * Garychou's pipeline ends at a 3DGS .ply. iOS places AR through AR Quick
- * Look, which renders meshes and — confirmed by Apple — does not render
+ * Look, which renders meshes and - confirmed by Apple - does not render
  * Gaussian splats. Most buyers here are on iPhone, so without a mesh there is
  * no AR at all. This is the bridge.
  *
@@ -37,7 +37,7 @@ import { writeGlbVertexColor, writeUsdzVertexColor } from "./lib/gltf.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 
-/** Interpreter with open3d installed. Overridable — CI and the container differ. */
+/** Interpreter with open3d installed. Overridable - CI and the container differ. */
 const PYTHON = process.env.SPLAT_PYTHON ?? "python3";
 const RECONSTRUCT = join(HERE, "splat_reconstruct.py");
 
@@ -109,7 +109,7 @@ let { normals, colors } = mesh;
 
 if (!normals) fail("Reconstructed mesh has no normals.");
 if (!colors) {
-  // Better a plain grey model than none — the shape is still the useful part.
+  // Better a plain grey model than none - the shape is still the useful part.
   process.stderr.write("note: mesh has no vertex colours; falling back to flat grey\n");
   colors = new Float32Array(mesh.vertexCount * 3).fill(0.72);
 }
@@ -125,7 +125,7 @@ for (let i = 0; i < positions.length; i += 3) {
   }
 }
 const extent = [max[0] - min[0], max[1] - min[1], max[2] - min[2]];
-if (!extent.every((e) => e > 1e-9)) fail("Reconstructed mesh is degenerate — zero extent on an axis.");
+if (!extent.every((e) => e > 1e-9)) fail("Reconstructed mesh is degenerate - zero extent on an axis.");
 
 // A splat file carries no unit, so the file's own numbers mean nothing. The
 // measured height is the only real dimension we have; everything scales off

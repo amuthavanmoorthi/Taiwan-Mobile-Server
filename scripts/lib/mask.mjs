@@ -3,7 +3,7 @@
  *
  * Depot photos are shot against a floor or wall, so the background is a
  * connected region touching the border. We flood-fill inward from the border
- * and keep whatever survives. No ML weights and nothing invented — the
+ * and keep whatever survives. No ML weights and nothing invented - the
  * silhouette comes from the actual pixels.
  */
 
@@ -131,7 +131,7 @@ export function buildMask(data, w, h, tolerance = null) {
   for (const tol of ladder) {
     const r = floodFrom(data, w, h, seeds, tol * tol * 9);
     // 3%–88% of frame: below that the item was eaten, above it the background
-    // survived. Take the first plausible one — lower tolerance keeps detail.
+    // survived. Take the first plausible one - lower tolerance keeps detail.
     if (r.coverage >= 0.03 && r.coverage <= 0.88) {
       return { ...r, tolerance: tol };
     }
@@ -142,7 +142,7 @@ export function buildMask(data, w, h, tolerance = null) {
   return best;
 }
 
-/** Keeps only the largest blob — drops specks and shadow islands. */
+/** Keeps only the largest blob - drops specks and shadow islands. */
 export function largestComponent(mask, w, h) {
   const n = w * h;
   const label = new Int32Array(n).fill(-1);
@@ -193,8 +193,8 @@ export function largestComponent(mask, w, h) {
 /**
  * Closes pinholes left by highlights, but leaves genuine gaps alone.
  *
- * A hole larger than `maxFraction` of the object is a real opening — the space
- * between chair legs, the gap under a shelf — and filling it would paint
+ * A hole larger than `maxFraction` of the object is a real opening - the space
+ * between chair legs, the gap under a shelf - and filling it would paint
  * background over something the buyer should see through.
  */
 export function fillHoles(mask, w, h, maxFraction = 0.02) {

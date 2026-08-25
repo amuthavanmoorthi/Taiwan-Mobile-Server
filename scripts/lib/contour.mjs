@@ -3,7 +3,7 @@
  *
  * Moore-neighbour boundary tracing gives an ordered outline; Douglas-Peucker
  * simplifies it; ear clipping turns it into triangles for the front and back
- * faces. Interior holes are ignored — the outer outline is what carries the
+ * faces. Interior holes are ignored - the outer outline is what carries the
  * shape of a piece of furniture.
  */
 
@@ -114,7 +114,7 @@ export function simplify(points, eps) {
   if (fx === lx && fy === ly) pts.pop();
   if (pts.length < 4) return pts;
 
-  // Farthest point from the first — a stable, cheap split.
+  // Farthest point from the first - a stable, cheap split.
   let far = 1;
   let best = -1;
   for (let i = 1; i < pts.length; i++) {

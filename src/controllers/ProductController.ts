@@ -4,7 +4,7 @@ import { BidModel } from "../models/BidModel.js";
 import { SiteModel } from "../models/SiteModel.js";
 import { HttpError } from "../lib/errors.js";
 
-/** CONTROLLER — storefront reads plus bidding. */
+/** CONTROLLER - storefront reads plus bidding. */
 export const ProductController = {
   search(filters: ProductFilters) {
     return ProductModel.search(filters);

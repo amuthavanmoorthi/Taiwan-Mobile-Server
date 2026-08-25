@@ -18,7 +18,7 @@ const publicUser = (u: {
   siteId: u.siteId,
 });
 
-/** CONTROLLER — registration, login, and the current session. */
+/** CONTROLLER - registration, login, and the current session. */
 export const AuthController = {
   async register(input: {
     email?: string;

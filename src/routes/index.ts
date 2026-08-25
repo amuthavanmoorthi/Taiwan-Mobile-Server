@@ -13,7 +13,7 @@ import { upload } from "../services/UploadService.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 
 /**
- * ROUTES — thin. Parse the request, call a controller, return JSON.
+ * ROUTES - thin. Parse the request, call a controller, return JSON.
  * No business logic and no Prisma calls live here.
  */
 export const router = Router();

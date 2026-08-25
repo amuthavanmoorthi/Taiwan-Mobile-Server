@@ -22,7 +22,7 @@
  * It is not a reconstruction of the unseen sides. Depth is an extrusion, so
  * the model reads correctly from the front and from a moderate angle, and
  * flattens out when viewed from the side. For anything where the profile
- * matters — sofas, corner units — capture multiple angles and use the
+ * matters - sofas, corner units - capture multiple angles and use the
  * photogrammetry pipeline instead.
  *
  * CONTRACT (see src/services/providers/localPipeline.ts)

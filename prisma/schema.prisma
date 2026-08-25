@@ -1,4 +1,4 @@
-// Second-hand furniture 3D/AR platform — demo schema.
+// Second-hand furniture 3D/AR platform - demo schema.
 // Mirrors the client's live auction site: district-level depots, a seller unit
 // per site, bidding on listings, and in-person collection only.
 
@@ -11,9 +11,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// buyer  — public shopper: bids, buys, collects
-// staff  — depot worker: verifies vouchers, releases items
-// admin  — operator: everything
+// buyer  - public shopper: bids, buys, collects
+// staff  - depot worker: verifies vouchers, releases items
+// admin  - operator: everything
 model User {
   id           String  @id @default(cuid())
   email        String  @unique
@@ -39,7 +39,7 @@ model User {
 model Site {
   id        String  @id @default(cuid())
   name      String
-  district  String // e.g. "土城區" — matches the client's district filter
+  district  String // e.g. "土城區" - matches the client's district filter
   address   String
   phone     String?
   openHours String?
@@ -68,14 +68,14 @@ model Product {
 
   // Real-world size in millimetres. Drives 1:1 AR placement, so it must be
   // set before listing. Photogrammetry cannot recover absolute scale on its
-  // own — scaleSource records how it was established.
+  // own - scaleSource records how it was established.
   widthMm     Int?
   depthMm     Int?
   heightMm    Int?
   scaleSource String? // manual | marker | arkit
 
-  // fixed   — buy now at priceTwd
-  // auction — bid from startingBidTwd until bidEndsAt (the client's model)
+  // fixed   - buy now at priceTwd
+  // auction - bid from startingBidTwd until bidEndsAt (the client's model)
   saleMode       String    @default("fixed")
   priceTwd       Int
   startingBidTwd Int?
@@ -195,7 +195,7 @@ model Order {
 /// staff through the depot area. Rules pages can reuse this shape later.
 model Faq {
   id        String  @id @default(cuid())
-  locale    String // zh | en — one row per language
+  locale    String // zh | en - one row per language
   question  String
   /// One bullet per line. Rendered as a list, so multi-part answers stay
   /// readable instead of becoming one run-on paragraph.

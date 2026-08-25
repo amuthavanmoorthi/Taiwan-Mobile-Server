@@ -3,7 +3,7 @@ import { OrderModel } from "../models/OrderModel.js";
 import { PaymentService } from "../services/PaymentService.js";
 import { HttpError } from "../lib/errors.js";
 
-/** CONTROLLER — checkout and the buyer's own orders. */
+/** CONTROLLER - checkout and the buyer's own orders. */
 export const OrderController = {
   async create(
     input: {

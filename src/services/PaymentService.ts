@@ -1,5 +1,5 @@
 /**
- * SERVICE — payment gateway boundary.
+ * SERVICE - payment gateway boundary.
  *
  * Sandbox stub. Swap the body for ECPay/NewebPay: create the order as
  * `awaiting_payment`, redirect the buyer to the gateway, and let the gateway

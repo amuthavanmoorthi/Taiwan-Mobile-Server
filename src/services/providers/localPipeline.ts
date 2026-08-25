@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { randomBytes } from "node:crypto";
 
 /**
- * PROVIDER — Garychou's reconstruction pipeline.
+ * PROVIDER - Garychou's reconstruction pipeline.
  *
  * The app does not know how the pipeline works; it only knows this contract.
  * That keeps his tooling free to change without touching the platform.
@@ -26,7 +26,7 @@ import { randomBytes } from "node:crypto";
  *
  * Scale is the pipeline's responsibility because only it knows the mesh
  * bounds. If it cannot honour --height-mm it must fail rather than emit an
- * unscaled model — a confidently wrong size is worse than no model.
+ * unscaled model - a confidently wrong size is worse than no model.
  */
 
 /**
@@ -123,7 +123,7 @@ export async function runLocalPipeline(
   }
   if (!existsSync(usdz)) {
     throw new Error(
-      `Pipeline produced a GLB but no ${slug}.usdz — iOS AR would be unavailable.`,
+      `Pipeline produced a GLB but no ${slug}.usdz - iOS AR would be unavailable.`,
     );
   }
 

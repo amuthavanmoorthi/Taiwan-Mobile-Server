@@ -21,11 +21,11 @@ const db = new PrismaClient();
  *
  * Opening hours are deliberately not stated per depot. Every listing on the
  * client's site says collection must be arranged by phone first, and the hours
- * differ by district — a plausible-looking "平日 09:00-17:00" on all thirty
+ * differ by district - a plausible-looking "平日 09:00-17:00" on all thirty
  * would be a guess a buyer could act on.
  *
  * Sites are matched on `district`, so re-running adds what is missing and
- * leaves existing rows — and the products attached to them — alone.
+ * leaves existing rows - and the products attached to them - alone.
  */
 
 type Seed = {

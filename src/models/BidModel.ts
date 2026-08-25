@@ -1,6 +1,6 @@
 import { db } from "../lib/db.js";
 
-/** MODEL — auction bids. */
+/** MODEL - auction bids. */
 export const BidModel = {
   highestFor(productId: string) {
     return db.bid.findFirst({

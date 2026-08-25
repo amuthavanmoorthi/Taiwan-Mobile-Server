@@ -24,24 +24,24 @@ const ZH: [string, string][] = [
 ];
 
 const EN: [string, string][] = [
-  ["I did not receive the verification email.", "Some free mail providers file it as spam — check that folder first.\nAdd our domain to your safe senders list, then resend from your account page."],
+  ["I did not receive the verification email.", "Some free mail providers file it as spam - check that folder first.\nAdd our domain to your safe senders list, then resend from your account page."],
   ["How do I know the item is usable?", "Every item is recovered and refurbished by a district cleaning team, then graded by hand before listing.\nListings include a 3D model and wear notes. Preview it at real size in AR before bidding.\nWinners may inspect the item at the depot before collection."],
   ["Can I inspect before paying?", "Yes. Call to book, then visit the depot during service hours."],
   ["How do I know if I won?", "The system closes the auction automatically. Results are emailed and shown under My bids."],
-  ["How does collection work?", "Book a slot at checkout and bring your voucher to the depot in that window.\nCollection is in person only — no courier or delivery service.\nBring your own vehicle and help with loading."],
+  ["How does collection work?", "Book a slot at checkout and bring your voucher to the depot in that window.\nCollection is in person only - no courier or delivery service.\nBring your own vehicle and help with loading."],
   ["Can I return an item?", "Second-hand items are sold as seen. If an item materially differs from its description, raise it with staff at collection."],
   ["What if I do not collect in time?", "Items uncollected 30 days after payment are treated as abandoned and relisted. Refunds follow Bureau policy."],
   ["Does AR preview need an app?", "No. Open the listing on your phone and tap “View in your room”.\nUse Safari on iOS or Chrome on Android, and allow camera access."],
   ["Is the AR size accurate?", "Models render at 1:1 real scale, measured and confirmed by staff before listing.\nThe model cannot be resized in AR, so the space check stays honest."],
   ["I forgot my password.", "Use the forgotten password link on the sign-in page; a reset link goes to your registered email."],
   ["How do I change my details?", "Sign in and edit your name and phone under My account. Email is your account identifier and cannot be changed here."],
-  ["Can I get a receipt?", "This follows the operating unit's policy — ask depot staff at collection."],
+  ["Can I get a receipt?", "This follows the operating unit's policy - ask depot staff at collection."],
 ];
 
 async function main() {
   const existing = await db.faq.count();
   if (existing > 0) {
-    console.log(`FAQ table already has ${existing} rows — skipping.`);
+    console.log(`FAQ table already has ${existing} rows - skipping.`);
     return;
   }
 

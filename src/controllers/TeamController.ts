@@ -4,7 +4,7 @@ import { hashPassword } from "../lib/auth.js";
 import { HttpError } from "../lib/errors.js";
 
 /**
- * CONTROLLER — provisioning the depot team.
+ * CONTROLLER - provisioning the depot team.
  *
  * Public registration only ever creates buyers, so without this an operator
  * had no way to add a depot worker or move one between depots: staff existed
@@ -169,7 +169,7 @@ export const TeamController = {
       throw new HttpError(
         `Cannot delete: this account is attached to ${orders} order(s), ` +
           `${bids} bid(s) and ${faqs} FAQ entr(ies). Set the role to buyer ` +
-          `instead — that removes depot access and keeps the records.`,
+          `instead - that removes depot access and keeps the records.`,
         409,
       );
     }

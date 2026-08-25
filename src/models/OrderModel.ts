@@ -1,7 +1,7 @@
 import { db } from "../lib/db.js";
 import { makeOrderCode } from "../lib/auth.js";
 
-/** MODEL — all Order data access. */
+/** MODEL - all Order data access. */
 export const OrderModel = {
   findById(id: string) {
     return db.order.findUnique({

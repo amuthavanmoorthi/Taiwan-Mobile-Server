@@ -1,7 +1,7 @@
 import { FaqModel } from "../models/FaqModel.js";
 import { HttpError } from "../lib/errors.js";
 
-/** CONTROLLER — public reads plus staff-managed writes. */
+/** CONTROLLER - public reads plus staff-managed writes. */
 export const FaqController = {
   list(locale?: string) {
     return FaqModel.published(locale === "en" ? "en" : "zh");

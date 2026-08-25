@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { randomBytes } from "node:crypto";
 
 /**
- * PROVIDER — Gaussian splat (.ply) to AR-ready mesh.
+ * PROVIDER - Gaussian splat (.ply) to AR-ready mesh.
  *
  * Garychou's pipeline ends at a 3DGS .ply and he does not export meshes.
  * AR Quick Look on iOS renders meshes and not splats, so this closes the gap
@@ -30,7 +30,7 @@ const OUT_ROOT = join(process.cwd(), "uploads", "models");
 export type SplatResult = { glbUrl: string; usdzUrl: string };
 
 /** True when the converter is present. Reconstruction also needs open3d, but
- *  that only surfaces on the first run — the script says so plainly. */
+ *  that only surfaces on the first run - the script says so plainly. */
 export const splatConversionAvailable = () => existsSync(SCRIPT);
 
 export async function runSplatPipeline(

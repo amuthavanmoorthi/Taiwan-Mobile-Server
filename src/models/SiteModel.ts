@@ -1,6 +1,6 @@
 import { db } from "../lib/db.js";
 
-/** MODEL — sites and their bookable pickup slots. */
+/** MODEL - sites and their bookable pickup slots. */
 export const SiteModel = {
   findById(id: string) {
     return db.site.findUnique({ where: { id } });

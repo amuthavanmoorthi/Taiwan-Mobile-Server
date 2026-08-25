@@ -1,7 +1,7 @@
 /**
  * One command to bring a fresh deployment up: `npm run bootstrap`.
  *
- * Syncs the schema, then seeds — but only when the database has no users.
+ * Syncs the schema, then seeds - but only when the database has no users.
  * prisma/seed.ts deletes every table before it writes, so running it against
  * a database staff have already added listings to would destroy their work.
  * The user count is what stands between the demo data and that.

@@ -1,6 +1,6 @@
 import { db } from "../lib/db.js";
 
-/** MODEL — all User data access. Controllers never touch `db`. */
+/** MODEL - all User data access. Controllers never touch `db`. */
 export const UserModel = {
   findByEmail(email: string) {
     return db.user.findUnique({ where: { email }, include: { site: true } });

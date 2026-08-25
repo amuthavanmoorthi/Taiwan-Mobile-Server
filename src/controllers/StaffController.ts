@@ -3,7 +3,7 @@ import { OrderAdminModel, type OrderFilters } from "../models/OrderAdminModel.js
 import { UserModel } from "../models/UserModel.js";
 import { HttpError } from "../lib/errors.js";
 
-/** CONTROLLER — depot queue and voucher verification. */
+/** CONTROLLER - depot queue and voucher verification. */
 export const StaffController = {
   async dashboard(userId: string) {
     const staff = await UserModel.findById(userId);

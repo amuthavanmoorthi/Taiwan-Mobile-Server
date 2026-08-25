@@ -4,7 +4,7 @@ import { randomBytes } from "node:crypto";
 import { mkdirSync } from "node:fs";
 
 /**
- * SERVICE — file intake for depot staff.
+ * SERVICE - file intake for depot staff.
  *
  * Local disk is fine for the demo. Move to object storage before this runs
  * anywhere real: 3D models are large, and the API server should not be the
@@ -28,7 +28,7 @@ const ALLOWED: Record<string, string[]> = {
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, UPLOAD_DIR),
   filename: (_req, file, cb) => {
-    // Never trust the client filename — generate our own.
+    // Never trust the client filename - generate our own.
     const ext = extname(file.originalname).toLowerCase();
     cb(null, `${Date.now()}-${randomBytes(6).toString("hex")}${ext}`);
   },

@@ -296,7 +296,7 @@ async function main() {
       // The only item here built from a Gaussian splat scan rather than a
       // photo. It carries both representations on purpose: the .ply is the
       // truer likeness and drives the on-page viewer, while the mesh exists
-      // solely so the AR button works — AR Quick Look cannot render splats,
+      // solely so the AR button works - AR Quick Look cannot render splats,
       // and most buyers here are on iPhone.
       {
         title: "三層收納推車",
@@ -325,7 +325,7 @@ async function main() {
   });
 
   console.log(`Seeded 3 sites, 3 users, ${slots.length} slots, 10 products.`);
-  console.log("Logins — staff@ntpc.gov.tw / admin@ntpc.gov.tw / buyer@example.com, all demo1234");
+  console.log("Logins - staff@ntpc.gov.tw / admin@ntpc.gov.tw / buyer@example.com, all demo1234");
 }
 
 main()

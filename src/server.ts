@@ -1,5 +1,5 @@
 // Load .env before anything reads process.env. Without this every setting
-// silently fell back to its default — including AUTH_SECRET.
+// silently fell back to its default - including AUTH_SECRET.
 try {
   process.loadEnvFile();
 } catch {

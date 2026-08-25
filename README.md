@@ -1,4 +1,4 @@
-# Backend — API
+# Backend - API
 
 Express + Prisma. Port **4000**. Start this before the frontend.
 
@@ -32,8 +32,8 @@ Reseeds without wiping.
 
 ## Prisma
 
-- `prisma/schema.prisma` — table definitions
-- `prisma/dev.db` — the actual database (SQLite, one file)
+- `prisma/schema.prisma` - table definitions
+- `prisma/dev.db` - the actual database (SQLite, one file)
 - After editing the schema: `npx prisma db push && npx prisma generate`
 
 ## Logins seeded

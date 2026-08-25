@@ -14,7 +14,7 @@ export type ProductFilters = {
   perPage?: number;
 };
 
-/** MODEL — all Product data access. */
+/** MODEL - all Product data access. */
 export const ProductModel = {
   buildWhere({
     category,

@@ -10,7 +10,7 @@ import { buildMask, largestComponent } from "./mask.mjs";
  * clutter in frame, and items running off the edge of the shot.
  *
  * The colour flood fill is kept as a fallback for when the model is
- * unavailable — no network on first run, or a restricted machine. It is
+ * unavailable - no network on first run, or a restricted machine. It is
  * markedly weaker, so the caller is told which one produced the mask.
  *
  * @returns { mask, width, height, method }

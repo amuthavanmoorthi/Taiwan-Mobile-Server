@@ -15,7 +15,7 @@
 # at the .ply, so the conversion happens on this box or nowhere.
 #
 # Open3D is a large wheel. If splat conversion is not wanted on a given
-# deployment, drop the two apt/pip layers below — the API detects the missing
+# deployment, drop the two apt/pip layers below - the API detects the missing
 # converter and hides the upload slot rather than failing at runtime.
 FROM node:20-bookworm-slim
 
@@ -39,7 +39,7 @@ WORKDIR /src
 
 # Dependencies first so a source-only change does not reinstall them.
 # The schema comes along because postinstall runs `prisma generate`, which
-# reads it — without this npm ci fails before any source is copied.
+# reads it - without this npm ci fails before any source is copied.
 COPY package.json package-lock.json ./
 COPY prisma ./prisma
 RUN npm ci

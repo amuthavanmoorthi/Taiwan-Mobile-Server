@@ -1,6 +1,6 @@
 import { db } from "../lib/db.js";
 
-/** MODEL — recently-viewed history for the buyer account page. */
+/** MODEL - recently-viewed history for the buyer account page. */
 export const ProductViewModel = {
   /** One row per user/product; re-viewing bumps the timestamp. */
   record(userId: string, productId: string) {

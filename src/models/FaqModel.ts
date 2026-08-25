@@ -1,6 +1,6 @@
 import { db } from "../lib/db.js";
 
-/** MODEL — FAQ entries. */
+/** MODEL - FAQ entries. */
 export const FaqModel = {
   published(locale: string) {
     return db.faq.findMany({

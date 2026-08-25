@@ -9,14 +9,14 @@ export type InventoryFilters = {
   category?: string;
   grade?: string;
   district?: string;
-  /** "missing_model" | "missing_usdz" | "missing_size" — data-quality gaps. */
+  /** "missing_model" | "missing_usdz" | "missing_size" - data-quality gaps. */
   issue?: string;
   sort?: string;
   page?: number;
   perPage?: number;
 };
 
-/** MODEL — writes and admin-side reads for Product. */
+/** MODEL - writes and admin-side reads for Product. */
 export const ProductAdminModel = {
   create(data: Prisma.ProductUncheckedCreateInput) {
     return db.product.create({ data, include: { site: true } });

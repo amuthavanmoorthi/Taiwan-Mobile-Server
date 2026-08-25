@@ -3,22 +3,22 @@ import { runLocalPipeline } from "./providers/localPipeline.js";
 import { runSplatPipeline, splatConversionAvailable } from "./providers/splatPipeline.js";
 
 /**
- * SERVICE — photo-to-3D generation.
+ * SERVICE - photo-to-3D generation.
  *
  * Pluggable on purpose. `MODELING_PROVIDER` selects the backend:
  *
- *   none   — default. Queues the job and fails it with a clear message.
+ *   none   - default. Queues the job and fails it with a clear message.
  *            Nothing is fabricated: a listing without a real model must never
  *            show an invented one, least of all in a government demo.
- *   meshy  — commercial single-image API (paid).
- *   local  — Garychou's own reconstruction pipeline.
+ *   meshy  - commercial single-image API (paid).
+ *   local  - Garychou's own reconstruction pipeline.
  *
  * Splat conversion (.ply → GLB + USDZ) is separate from all of that. It is
  * our own script rather than a provider, so it is always available.
  *
  * Single-photo generation recovers a plausible mesh but NOT absolute scale,
  * and it invents the unseen faces. Callers pass the staff-measured height so
- * the result can be scaled to something real — without that, AR at 1:1 would
+ * the result can be scaled to something real - without that, AR at 1:1 would
  * be confidently wrong, which is worse than no AR.
  */
 

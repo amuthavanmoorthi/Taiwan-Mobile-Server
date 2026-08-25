@@ -33,7 +33,7 @@ export function readPlyMesh(buf) {
     throw new Error("Only binary_little_endian PLY meshes are supported.");
   }
 
-  // Parse the element/property tables in order — offsets depend on it.
+  // Parse the element/property tables in order - offsets depend on it.
   const elements = [];
   let current = null;
   for (const line of header.split("\n")) {
