@@ -52,12 +52,13 @@ async function main() {
     data: {
       name: "新北市板橋區清潔隊",
       district: "板橋區",
-      address: "新北市板橋區中正路１號",
-      phone: "02-2960-3456",
-      openHours: "平日 09:00-17:00",
+      // From the EPB's published 各區清潔隊聯絡資料 dataset. The contact name
+      // and mailbox that used to sit here were invented, and 02-2960-3456 is
+      // the bureau switchboard, not this depot.
+      address: "新北市板橋區實踐路3號",
+      phone: "02-89534369",
+      openHours: "請先電話預約取貨時間",
       sellerUnit: "板橋區清潔隊",
-      sellerContact: "陳先生",
-      sellerEmail: "banqiao@ntpc.gov.tw",
     },
   });
 
