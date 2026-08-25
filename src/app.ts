@@ -1,10 +1,10 @@
 import express from "express";
-import { join } from "node:path";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { router } from "./routes/index.js";
 import { withSession } from "./middleware/auth.js";
 import { errorHandler } from "./middleware/errorHandler.js";
+import { UPLOAD_DIR } from "./services/UploadService.js";
 
 export function createApp() {
   const app = express();
@@ -17,7 +17,10 @@ export function createApp() {
   app.use(withSession);
 
   // Uploaded photos and 3D models.
-  app.use("/uploads", express.static(join(process.cwd(), "uploads")));
+  // Serve from wherever uploads are actually written. These were two
+  // different paths the moment UPLOAD_DIR pointed at a mounted volume, so
+  // every uploaded file 404'd while the writes themselves succeeded.
+  app.use("/uploads", express.static(UPLOAD_DIR));
 
   app.use("/api", router);
   app.use(errorHandler);

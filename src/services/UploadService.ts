@@ -19,8 +19,24 @@ import {
  */
 // Zeabur container storage is ephemeral unless we point at a mounted volume.
 // Default to a local folder for dev, but allow an override in production.
-const UPLOAD_DIR = process.env.UPLOAD_DIR ?? join(process.cwd(), "uploads");
-mkdirSync(UPLOAD_DIR, { recursive: true });
+export const UPLOAD_DIR = process.env.UPLOAD_DIR ?? join(process.cwd(), "uploads");
+
+/**
+ * Why this is not allowed to throw.
+ *
+ * This runs at import, so an exception here takes the whole API down before it
+ * serves a single request - and the cause would be an upload directory, which
+ * nothing else depends on. A crash loop over storage means the catalogue, the
+ * login and the depot queue all go dark because a volume was mounted with the
+ * wrong permissions. The failure is recorded and reported through
+ * /staff/storage instead, so the API stays up and says what is wrong.
+ */
+let mkdirError: string | null = null;
+try {
+  mkdirSync(UPLOAD_DIR, { recursive: true });
+} catch (e) {
+  mkdirError = (e as Error).message;
+}
 
 // Images for the listing, GLB/USDZ for the AR pipeline, .ply for a Gaussian
 // splat scan we convert ourselves. Anything else is rejected rather than
@@ -118,6 +134,7 @@ export const UploadService = {
 
     return {
       dir: UPLOAD_DIR,
+      error: mkdirError,
       // The only signal available: an explicit UPLOAD_DIR means somebody
       // chose the location, which is what mounting a volume requires.
       persistent: configured,
