@@ -4,8 +4,13 @@ import { hashPassword } from "../src/lib/auth.js";
 const db = new PrismaClient();
 
 /**
- * Demo data modelled on the client's live listings: district-level depots,
- * a seller unit per site, a mix of fixed-price and auction items.
+ * Demo data modelled on the client's live listings: district-level depots and
+ * a seller unit per site.
+ *
+ * Everything is fixed price. The client's own site runs auctions and the
+ * platform supports them, but Carl asked for fixed price first, so that is
+ * what the demo shows. Switching an item back is a saleMode plus a starting
+ * bid and an end date.
  */
 
 const PICKUP_TERMS = `1.本物件為經清潔隊〔二手回收〕後整理之堪用品，非新品(如照片所示)，購買前敬請三思。
@@ -102,9 +107,6 @@ async function main() {
   }
   await db.pickupSlot.createMany({ data: slots });
 
-  const in14Days = new Date();
-  in14Days.setDate(in14Days.getDate() + 14);
-
   await db.product.createMany({
     data: [
       {
@@ -135,10 +137,8 @@ async function main() {
         defects: "扶手泡棉略有塌陷。",
         widthMm: 600, depthMm: 600, heightMm: 1050,
         scaleSource: "manual",
-        saleMode: "auction",
+        saleMode: "fixed",
         priceTwd: 800,
-        startingBidTwd: 350,
-        bidEndsAt: in14Days,
         status: "listed",
         siteId: tucheng.id,
         pickupTerms: PICKUP_TERMS,
@@ -154,10 +154,8 @@ async function main() {
         grade: "A",
         widthMm: 600, depthMm: 400, heightMm: 800,
         scaleSource: "manual",
-        saleMode: "auction",
+        saleMode: "fixed",
         priceTwd: 600,
-        startingBidTwd: 210,
-        bidEndsAt: in14Days,
         status: "listed",
         siteId: banqiao.id,
         pickupTerms: PICKUP_TERMS,

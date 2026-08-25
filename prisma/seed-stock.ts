@@ -138,15 +138,11 @@ async function main() {
     return;
   }
 
-  const now = Date.now();
   const rows = empty.flatMap((site, siteIndex) =>
     // Three per depot: enough that a filtered page looks like a catalogue
     // rather than a placeholder, without burying the hand-made listings.
     [0, 1, 2].map((n) => {
       const t = pick(CATALOGUE, siteIndex * 3 + n);
-      // Every third item runs as an auction, matching the client's live site.
-      const isAuction = (siteIndex + n) % 3 === 0;
-      const endsAt = new Date(now + (3 + ((siteIndex + n) % 9)) * 24 * 60 * 60 * 1000);
 
       return {
         title: t.title,
@@ -160,10 +156,10 @@ async function main() {
         depthMm: t.depthMm,
         heightMm: t.heightMm,
         scaleSource: "manual",
-        saleMode: isAuction ? "auction" : "fixed",
+        // Fixed price only: Carl asked for that mode first. Auctions still
+        // work, they are just not what the demo leads with.
+        saleMode: "fixed",
         priceTwd: t.priceTwd,
-        startingBidTwd: isAuction ? Math.round(t.priceTwd * 0.6) : null,
-        bidEndsAt: isAuction ? endsAt : null,
         status: "listed",
         siteId: site.id,
         pickupTerms: PICKUP_TERMS,
