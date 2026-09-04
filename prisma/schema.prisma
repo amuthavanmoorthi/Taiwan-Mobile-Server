@@ -103,9 +103,15 @@ model Product {
   //
   // "review" means a model exists but staff have not yet accepted it. A
   // generated model is never shown to buyers before someone has looked at it.
-  modelStatus String  @default("none")
-  modelSource String? // upload | single_photo | multi_photo | gaussian_splat
-  modelError  String?
+  modelStatus   String  @default("none")
+  modelSource   String? // upload | single_photo | multi_photo | gaussian_splat
+  modelError    String?
+  /// 0-100 while a model is being generated. Reported by the pipeline itself
+  /// rather than guessed from elapsed time, so it does not sit at 90% while
+  /// the slow part runs.
+  modelProgress Int?
+  /// Which step is running, as a key the UI translates.
+  modelStage    String?
 
   // What the item should become once its model is accepted or rejected. Set
   // when generation is requested, because the item is held as a draft until

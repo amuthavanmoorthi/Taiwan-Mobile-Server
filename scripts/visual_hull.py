@@ -53,6 +53,16 @@ def log(*a):
     print(*a, file=sys.stderr, flush=True)
 
 
+def progress(pct, stage):
+    """
+    Machine-readable progress on stdout, separate from the human log on stderr.
+
+    Reported by the step that knows, rather than interpolated from elapsed
+    time: carving dominates the runtime and the wait is worth showing honestly.
+    """
+    print(f"PROGRESS {pct} {stage}", flush=True)
+
+
 def die(msg):
     print(msg, file=sys.stderr, flush=True)
     sys.exit(1)
@@ -263,11 +273,13 @@ def main():
     # on; it is stated in the operator's instructions.
     angles = np.linspace(0, 2 * np.pi, len(masks), endpoint=False)
 
+    progress(35, "carving")
     log(f"carving from {len(masks)} views")
     axis_x, ground_y, height_px = silhouette_metrics(masks)
     occupied, xs, ys, zs = carve(masks, angles, axis_x, ground_y, height_px, args.resolution)
     log(f"  {occupied.sum()} voxels survived ({100 * occupied.mean():.1f}% of the block)")
 
+    progress(60, "surfacing")
     pts, normals = surface_points(occupied, xs, ys, zs)
     log(f"  {len(pts)} surface voxels")
 
@@ -275,6 +287,7 @@ def main():
     pcd.points = o3d.utility.Vector3dVector(pts)
     pcd.normals = o3d.utility.Vector3dVector(normals)
 
+    progress(72, "meshing")
     mesh, density = o3d.geometry.TriangleMesh.create_from_point_cloud_poisson(pcd, depth=8)
     if len(mesh.triangles) == 0:
         die("Could not build a surface from the carved shape.")
@@ -293,6 +306,7 @@ def main():
     if len(mesh.triangles) == 0:
         die("Cleaning removed the whole surface.")
 
+    progress(88, "colouring")
     verts = np.asarray(mesh.vertices)
     vnorm = np.asarray(mesh.vertex_normals)
     mesh.vertex_colors = o3d.utility.Vector3dVector(

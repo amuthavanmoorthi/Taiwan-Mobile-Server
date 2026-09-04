@@ -18,7 +18,7 @@
  */
 
 import sharp from "sharp";
-import { spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -51,6 +51,11 @@ function fail(message) {
   process.exit(1);
 }
 
+/** Machine-readable progress on stdout; the human log stays on stderr. */
+function progress(pct, stage) {
+  process.stdout.write(`PROGRESS ${pct} ${stage}\n`);
+}
+
 const args = parseArgs(process.argv.slice(2));
 const inputs = (args.inputs ?? "").split(",").filter(Boolean);
 const outdir = args.outdir;
@@ -80,6 +85,9 @@ const maskPaths = [];
 let weakest = null;
 
 for (const [i, input] of inputs.entries()) {
+  // Segmentation is the first third of the work and runs once per photo, so
+  // it is the part with genuinely granular progress to report.
+  progress(Math.round((i / inputs.length) * 30), "segmenting");
   let result;
   try {
     result = await segment(input, WORK);
@@ -125,31 +133,52 @@ if (weakest !== null) {
 
 // --- 2. carve -------------------------------------------------------------
 
+progress(32, "carving");
 const meshPath = join(work, "hull.ply");
-const py = spawnSync(
-  PYTHON,
-  [
-    CARVER,
-    "--masks", maskPaths.join(","),
-    "--photos", inputs.join(","),
-    "--output", meshPath,
-  ],
-  { shell: false, encoding: "utf8", maxBuffer: 16 * 1024 * 1024 },
-);
+// Streamed rather than run synchronously: the carver reports its own progress
+// on stdout, and collecting it at the end would defeat the point.
+const carve = await new Promise((resolve) => {
+  const child = spawn(
+    PYTHON,
+    [CARVER, "--masks", maskPaths.join(","), "--photos", inputs.join(","), "--output", meshPath],
+    { shell: false },
+  );
 
-if (py.error) {
+  let stderr = "";
+  let out = "";
+
+  child.stdout.on("data", (d) => {
+    out += String(d);
+    const lines = out.split("\n");
+    out = lines.pop() ?? "";
+    // Forward the child's progress as our own; everything else is ignored.
+    for (const line of lines) {
+      if (line.startsWith("PROGRESS ")) process.stdout.write(`${line}\n`);
+    }
+  });
+
+  child.stderr.on("data", (d) => {
+    stderr += String(d);
+    if (stderr.length > 8000) stderr = stderr.slice(-8000);
+  });
+
+  child.on("error", (e) => resolve({ error: e, stderr }));
+  child.on("close", (code) => resolve({ code, stderr }));
+});
+
+if (carve.error) {
   rmSync(work, { recursive: true, force: true });
   fail(
-    `Could not run the carving step (${PYTHON}): ${py.error.message}. ` +
+    `Could not run the carving step (${PYTHON}): ${carve.error.message}. ` +
       `Install open3d, numpy and pillow, or point SPLAT_PYTHON at an interpreter that has them.`,
   );
 }
-if (py.status !== 0 || !existsSync(meshPath)) {
-  const lines = (py.stderr ?? "").split("\n").map((l) => l.trim()).filter(Boolean);
+if (carve.code !== 0 || !existsSync(meshPath)) {
+  const lines = (carve.stderr ?? "").split("\n").map((l) => l.trim()).filter(Boolean);
   rmSync(work, { recursive: true, force: true });
-  fail(lines.length ? lines[lines.length - 1] : `Carving failed (exit ${py.status}).`);
+  fail(lines.length ? lines[lines.length - 1] : `Carving failed (exit ${carve.code}).`);
 }
-process.stderr.write((py.stderr ?? "").split("\n").filter((l) => l.startsWith("  ")).join("\n") + "\n");
+process.stderr.write((carve.stderr ?? "").split("\n").filter((l) => l.startsWith("  ")).join("\n") + "\n");
 
 // --- 3. read back, scale, write ------------------------------------------
 
@@ -190,11 +219,14 @@ for (let i = 0; i < positions.length; i += 3) {
   out[i + 2] = (positions[i + 2] - cz) * scale;
 }
 
+progress(94, "writing");
 mkdirSync(outdir, { recursive: true });
 const glb = writeGlbVertexColor({ positions: out, normals, colors, indices });
 writeFileSync(join(outdir, `${name}.glb`), glb);
 const usdz = writeUsdzVertexColor({ positions: out, normals, colors, indices, name });
 writeFileSync(join(outdir, `${name}.usdz`), usdz);
+
+progress(100, "done");
 
 const cm = (v) => (v * scale * 100).toFixed(1);
 process.stderr.write(

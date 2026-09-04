@@ -81,6 +81,8 @@ export const ModelingService = {
     await ProductAdminModel.update(job.productId, {
       modelStatus: "processing",
       modelError: null,
+      modelProgress: 0,
+      modelStage: "starting",
     });
 
     // Height anchors the model to reality on both paths. A splat file carries
@@ -107,7 +109,18 @@ export const ModelingService = {
     // measured height, so the result is interchangeable from here up.
     const views = job.photoPaths ?? [];
     if (views.length >= MIN_VIEWS && photosPipelineAvailable()) {
-      const { glbUrl, usdzUrl } = await runPhotosPipeline(views, job.heightMm);
+      const { glbUrl, usdzUrl } = await runPhotosPipeline(
+        views,
+        job.heightMm,
+        (pct, stage) => {
+          // Fire and forget: a failed progress write must never fail the job
+          // it is reporting on.
+          void ProductAdminModel.update(job.productId, {
+            modelProgress: pct,
+            modelStage: stage,
+          }).catch(() => {});
+        },
+      );
       await ProductAdminModel.update(job.productId, {
         glbUrl,
         usdzUrl,
@@ -117,6 +130,8 @@ export const ModelingService = {
         // be labelled as coming from one photo.
         modelSource: "multi_photo",
         modelError: null,
+        modelProgress: 100,
+        modelStage: "done",
       });
       return;
     }

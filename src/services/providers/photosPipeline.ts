@@ -37,9 +37,12 @@ export const photosPipelineAvailable = () => existsSync(SCRIPT);
 
 export type PhotosResult = { glbUrl: string; usdzUrl: string };
 
+export type ProgressReport = (pct: number, stage: string) => void;
+
 export async function runPhotosPipeline(
   photoPaths: string[],
   heightMm: number,
+  onProgress?: ProgressReport,
 ): Promise<PhotosResult> {
   if (!existsSync(SCRIPT)) {
     throw new Error(`The carving script is missing (expected at ${SCRIPT}).`);
@@ -70,6 +73,19 @@ export async function runPhotosPipeline(
     child.stderr.on("data", (d) => {
       stderr += String(d);
       if (stderr.length > 8000) stderr = stderr.slice(-8000);
+    });
+
+    // The script reports its own progress on stdout, one line per step. It is
+    // buffered by line because a chunk can split mid-line.
+    let out = "";
+    child.stdout.on("data", (d) => {
+      out += String(d);
+      const lines = out.split("\n");
+      out = lines.pop() ?? "";
+      for (const line of lines) {
+        const m = line.match(/^PROGRESS (\d+) (\w+)$/);
+        if (m) onProgress?.(Number(m[1]), m[2]);
+      }
     });
 
     const timer = setTimeout(() => {
